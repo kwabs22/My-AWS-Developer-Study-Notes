@@ -24,8 +24,21 @@ vs
 Coordinator - Stepfunctions, MWAA (Apache Airflow)
 
 ## Fanout
+
 https://youtu.be/8BEwZnUIZfw - Back to Basics: Building Fan-Out Serverless Architectures Using SNS, SQS and Lambda
 Pub/Sub Fanout - SNS (Built in retries and failure handling, filter policy) prefered when multiple subscribers get same message - Example Architecture in the video
 
-
 # Idempotency
+
+
+# Differences between stateful and stateless concepts
+
+
+# Differences between tightly coupled and loosely coupled components
+
+
+# Fault-tolerant design patterns (for example, retries with exponential backoff and jitter, dead-letter queues)
+
+
+
+# Differences between synchronous and asynchronous patterns
