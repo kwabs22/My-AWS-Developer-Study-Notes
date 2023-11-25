@@ -12,6 +12,8 @@ https://youtu.be/rv4LlmLmVWk - Microservices explained - the What, Why and How? 
 eg. Monolithic = Three Tier - Presentation, Logical, Data vs  Microservice = Logic and Data Layer as many APIs using containers and async messaging / http request / service mesh (kubernetes)
 Scaling issues is main driver
 
+Three
+
 ## Choreography vs Orchestration
 
 https://youtu.be/goRhvp0GOhg - AWS On Air ft. Orchestration vs Choreography - AWS Events
@@ -23,7 +25,7 @@ Coordinator - Stepfunctions, MWAA (Apache Airflow)
 
 ## Fanout
 https://youtu.be/8BEwZnUIZfw - Back to Basics: Building Fan-Out Serverless Architectures Using SNS, SQS and Lambda
-Pub/Sub Fanout - SNS (Built in retries and failure handling) prefered when multiple subscribers get same message - Example Architecture in the video
+Pub/Sub Fanout - SNS (Built in retries and failure handling, filter policy) prefered when multiple subscribers get same message - Example Architecture in the video
 
 
 # Idempotency
