@@ -1,10 +1,14 @@
 Pipe is the splitter so can split by newlines to create tally
 
+Everything can usually be done in programming language / cli so our interest is everything outside of those
 
+Main themes = debug - monitor, infrastructure changes, artifact creation, security, scaling, 
+
+Timeline = events = architecture diagram
 
 AWS exam guides for Developer
 
-Domain 1: Development with AWS Services
+Domain 1: Development with AWS Services - 
 Task Statement 1: Develop code for applications hosted on AWS.
 Skills in:
 • Creating fault-tolerant and resilient applications in a programming language (for example, Java, C#, Python, JavaScript, TypeScript, Go)
