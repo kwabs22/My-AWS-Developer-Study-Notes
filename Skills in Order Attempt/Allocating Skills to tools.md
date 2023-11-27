@@ -30,93 +30,133 @@ What about ECS and EKS?
 
 Every Skills Line Item leads to code so therefore to make the experimental timeline we need to have all the seperate concepts first and merge them to get the execution order
 
-
-
 # Claude Assisted code as basis to build on
 
 ***Domain 4: Troubleshooting and Optimization
 Task Statement 1: Assist in a root cause analysis.
 Skills in:***
 
-
 # Debugging code to identify defects
 
-1. Use `print` statements:
+Here are some ways to debug code to identify defects in Python:
 
-python
+1. Use `print` statements:
 
-Copy code
-
-`def sum(x, y):    print(f"Inputs are: {x} {y}")    result = x + y   print(f"Result: {result}")     return result`
+```python
+def sum(x, y):
+   print(f"Inputs are: {x} {y}")
+   result = x + y 
+   print(f"Result: {result}") 
+   return result
+```
 
 Add temporary prints to output key variables and check values.
 
 2. Use built-in Python debugger pdb:
 
-Copy code
+```
+import pdb
 
-`import pdb def divide(x, y):    pdb.set_trace()    return x / y  divide(5, 0)`
+def divide(x, y):
+   pdb.set_trace()
+   return x / y
+
+divide(5, 0)
+```
 
 Will stop at breakpoint to inspect stack, variables.
 
 3. Use IDE debugger abilities like breakpoint setting, step through execution.
-4. Implement automated testing to catch logical errors:
 
-python
+4. Implement automated testing to catch logical errors: 
 
-Copy code
+```python
+import unittest
+from calc import sum
 
-`import unittest from calc import sum class TestSum(unittest.TestCase):     def test_sum(self):          self.assertEqual(sum(3, 5), 8)`
+class TestSum(unittest.TestCase):
+
+    def test_sum(self): 
+        self.assertEqual(sum(3, 5), 8)  
+```
 
 5. Enable logging to files and cloud to diagnose crashes:
 
-python
+```python
+import logging 
+logging.basicConfig(filename='app.log', level=logging.ERROR)
+```
 
-Copy code
+So in summary, "print debugging", IDE debuggers, automated tests, and logging help systematically catch bugs without relying solely on manual testing and execution tracking.
 
-`import logging  logging.basicConfig(filename='app.log', level=logging.ERROR)`
-
-
+The key is instrumenting code to validate correctness of logic at key points.
 
 # Interpreting application metrics, logs, and traces
 
+Interpreting application metrics, logs, and traces in code typically involves:
+
+1. **Ingesting/Streaming Data**: Get the monitoring data into your applications in real-time using services like CloudWatch, Kinesis, SQS:
+
+```python
 import boto3
 cloudwatch = boto3.client('cloudwatch')
 streams = []
 while True:
    logs = cloudwatch.get_log_events(logGroupName="myApp")  
    streams.append(logs)
+```
 
+2. **Parsing/Normalizing**: Standardize the data formats using regexp, JSON parsers etc:
+
+```python
 import json 
 for log in streams:
    data = json.loads(log)
    timestamp = data['timestamp'] # Parse fields
+```
 
+3. **Analysis**: Apply filters, aggregations, statistical analysis to extract insights: 
+
+```python
 from collections import defaultdict
 metric_data = defaultdict(list) 
 
 for log in streams:
    metric = log['name'] 
    value = log['value']
-   metric_data[metric].append(value) 
+   metric_data[metric].append(value)
 
-#Calculate avg, percentiles etc
+# Calculate avg, percentiles etc  
+```
 
+4. **Visualization**: Plot metrics on charts, create alerts and dashboards:
+
+```python
 import matplotlib.pyplot as plt
 
 for metric in metric_data:
    plt.plot(metric_data[metric]) 
    plt.title(metric)
    plt.savefig('metric.png')
+```
+
+So in summary, leveraging libraries like JSON, regex, statistics, visualization in code unlocks powerful log/metric analysis abilities with flexibility to customize for your app specifics.
 
 # Querying logs to find relevant data
 
-Cloudwatch logs insights
+Here are some ways to query logs to find relevant data in code:
 
+1. Use a log aggregation service like CloudWatch Logs Insights and query using SQL:
+
+```sql
 SELECT * FROM log_group 
 WHERE http_status = 500
 LIMIT 100
+```
 
+2. Stream logs to Lambda and filter with Python:
+
+```python
 import json
 
 def lambda_handler(event, context):
@@ -124,14 +164,27 @@ def lambda_handler(event, context):
         log = json.loads(record['message'])  
         if log['http_status'] == 500:
             print(log)
+```
 
+3. Load logs into Elasticsearch and search:
+
+```python
 from opensearchpy import OpenSearch 
 
 es = OpenSearch()
 res = es.search(index="logs", body={"query": {"match": {"message": "error"}}})
 print(res['hits']['hits'])
+```
 
+4. Parse log file directly and grep patterns: 
+
+```bash
 cat application.log | grep "RUNTIME ERROR"
+```
+
+The main idea is leveraging services like CloudWatch, Elasticsearch, or languages like Python and SQL to apply filters, queries, and aggregations instead of manual searching.
+
+Automating relevant data extraction from huge log volumes.
 
 # Implementing custom metrics (for example, CloudWatch embedded metric format [EMF])
 
@@ -139,27 +192,50 @@ Here are a few ways to implement custom metrics in code using CloudWatch Embedde
 
 1. Instrument application code to publish metrics directly:
 
-python
+```python
+import cw_emf
+emf = cw_emf.emf()
 
-Copy code
-
-`import cw_emf emf = cw_emf.emf() emf.set_metric(name="ProcessedRecords", unit="Count", value=1024) emf.put_metric_data()`
+emf.set_metric(name="ProcessedRecords", unit="Count", value=1024)
+emf.put_metric_data()
+```
 
 2. Generate EMF JSON programmatically and push:
 
-python
+```python
+import json
 
-Copy code
+metric_data = {
+   "Metrics": [
+      {
+         "Name": "UserSignups",
+         "Unit": "Count",
+         "Value": 1.0
+      }
+   ]
+}
 
-`import json metric_data = {    "Metrics": [       {          "Name": "UserSignups",          "Unit": "Count",          "Value": 1.0       }    ] } emf_json = json.dumps(metric_data) # Send json to CloudWatch EMF endpoint`
+emf_json = json.dumps(metric_data)
+# Send json to CloudWatch EMF endpoint
+```
 
 3. Create custom metrics proxy/decorator:
 
-python
+```python
+def emf_metric(name, unit):
+   def decorate(func):       
+       def wrapper(*args, **kwargs):
+           value = func(*args, **kwargs) 
+           # EMF put logic
+           return value
+       return wrapper
+   return decorate
 
-Copy code
-
-`def emf_metric(name, unit):    def decorate(func):               def wrapper(*args, **kwargs):            value = func(*args, **kwargs)             # EMF put logic            return value       return wrapper   return decorate @emf_metric(name="Orders", unit="Count") def get_orders():    # Function logic    return len(orders)`
+@emf_metric(name="Orders", unit="Count")
+def get_orders():
+   # Function logic
+   return len(orders)
+```
 
 So in summary, either explicitly formatting EMF JSON, or using libraries/abstractions over it allows publishing custom metrics directly from app code.
 
@@ -171,31 +247,47 @@ Here are some ways to review application health in code using dashboards and ins
 
 1. Use CloudWatch dashboards and generate graphs automatically:
 
-python
+```python
+import boto3
+cloudwatch = boto3.client('cloudwatch')
 
-Copy code
+resp = cloudwatch.get_metric_statistics(Namespace='MyApp', MetricName='Latency', Period=60, Statistic='Average')
+latency_data = resp['Datapoints']
 
-`import boto3 cloudwatch = boto3.client('cloudwatch') resp = cloudwatch.get_metric_statistics(Namespace='MyApp', MetricName='Latency', Period=60, Statistic='Average') latency_data = resp['Datapoints'] # Plot graphs, create CloudWatch dashboard import matplotlib.pyplot as plt plt.plot(latency_data) plt.title("Application Latency")  plt.savefig("app_latency.png") # Upload image to CloudWatch dashboard cloudwatch.put_metric_dashboard(DashboardName="MyApp Dashboard", DashboardBody=open("app_latency.png", "rb").read())`
+# Plot graphs, create CloudWatch dashboard
+import matplotlib.pyplot as plt
+plt.plot(latency_data)
+plt.title("Application Latency") 
+plt.savefig("app_latency.png")
 
-2. Compute aggregates and statistics for anomalies:
+# Upload image to CloudWatch dashboard
+cloudwatch.put_metric_dashboard(DashboardName="MyApp Dashboard", DashboardBody=open("app_latency.png", "rb").read())
+```
 
-python
+2. Compute aggregates and statistics for anomalies: 
 
-Copy code
+```python
+from scipy import stats
+latency_data = get_latency_data() # Fetch data
 
-`from scipy import stats latency_data = get_latency_data() # Fetch data mean = np.mean(latency_data) std_dev = np.std(latency_data) # Check thresholds if latency_data[-1] > mean + 2*std_dev:     send_alarm()`
+mean = np.mean(latency_data)
+std_dev = np.std(latency_data)
+
+# Check thresholds
+if latency_data[-1] > mean + 2*std_dev:  
+  send_alarm()
+```
 
 3. Correlate metrics and logs for insights into issues:
 
-python
+```python
+logs = parse_app_logs() 
+errors = [log for log in logs if log['level'] == 'ERROR']
 
-Copy code
-
-`logs = parse_app_logs()  errors = [log for log in logs if log['level'] == 'ERROR'] get_metric_data('FailureRate') # Compare for trends`
+get_metric_data('FailureRate') # Compare for trends  
+```
 
 The main idea is leveraging data analysis libraries for aggregations, correlations and visualizations to get insights into application health programatically.
-
-
 
 # Troubleshooting deployment failures by using service output logs
 
@@ -205,10 +297,10 @@ Here are some tips for troubleshooting deployment failures using service logs:
 
 For example, in AWS you can enable deployment logs from services like:
 
-- CloudFormation
+- CloudFormation 
 - AWS CodeDeploy
 - Elastic Beanstalk
-- ECS Task Definition
+- ECS Task Definition 
 
 These will output logs to CloudWatch Logs when deployments run.
 
@@ -216,43 +308,37 @@ These will output logs to CloudWatch Logs when deployments run.
 
 Use a log parsing library to extract key fields like status, timestamps, resources:
 
-python
+```python
+for event in deployment_logs:
+    print(event["status"], event["resource"], event["time"])
+```
 
-Copy code
-
-`for event in deployment_logs:     print(event["status"], event["resource"], event["time"])`
-
-**3. Identify failure events**
+**3. Identify failure events** 
 
 Filter logs on failure statuses, errors, exceptions:
 
-python
-
-Copy code
-
-`fail_events = [e for e in logs if e["status"] == "FAILED"]`
+```python
+fail_events = [e for e in logs if e["status"] == "FAILED"]
+```
 
 **4. Compare across deployment log history**
 
 See if the issue started happening recently versus older deployments:
 
-python
-
-Copy code
-
-`old_logs = fetch_logs("deployments-2021*")  new_logs = fetch_logs("deployments-2022*")`
+```python
+old_logs = fetch_logs("deployments-2021*") 
+new_logs = fetch_logs("deployments-2022*")
+```
 
 See when and where failures began being introduced.
 
 **5. Cross-reference infrastructure/app logs**
 
-Correlate failures and timing of issues across services:
+Correlate failures and timing of issues across services: 
 
-python
-
-Copy code
-
-`app_errors = get_app_errors(time=deploy_failure_time)`
+```python
+app_errors = get_app_errors(time=deploy_failure_time)
+```
 
 This structured inspection of machine-generated deployment logs helps reveal issues without needing to manually piece together what happened across environments. Automated parsing brings out key info needed for diagnosing common deployment failures faster.
 
@@ -268,43 +354,46 @@ Here are some best practices for implementing an effective logging strategy in c
 
 1. Log to a central location like CloudWatch Logs or Elasticsearch to aggregate logs:
 
-python
-
-Copy code
-
-`import logging logging.getLogger().addHandler(cloudwatch.CloudWatchLogHandler()) logging.error("Payment failed for order xyz")`
+```python
+import logging 
+logging.getLogger().addHandler(cloudwatch.CloudWatchLogHandler()) 
+logging.error("Payment failed for order xyz")
+```
 
 2. Log using different severity levels - info, warn, error critical:
 
-python
-
-Copy code
-
-`import logging logging.critical("App crashed with error!") #critical issues logging.error("API rate exceeded limits") logging.info("User logged in") #track events`
+```python
+import logging 
+logging.critical("App crashed with error!") #critical issues 
+logging.error("API rate exceeded limits") 
+logging.info("User logged in") #track events
+```
 
 3. Create a common log format using JSON for querying:
 
-python
-
-Copy code
-
-`import json log = {     "level": "error",     "event": "payment_failed",      "orderid": xyz,     "time": datetime.now() } json_log = json.dumps(log) print(json_log)`
+```python
+import json log = { 
+        "level": "error", 
+        "event": "payment_failed", 
+        "orderid": xyz, 
+        "time": datetime.now() 
+    } 
+json_log = json.dumps(log) 
+print(json_log)
+```
 
 4. Capture metadata like versions, stack traces, configs:
 
-python
-
-Copy code
-
-`logging.error("Payment error", exc_info=True, stack_info=True)`
+```python
+logging.error("Payment error", exc_info=True, stack_info=True)`
+```
 
 5. Sensitive data should be masked or hashed in logs:
 
-python
-
-Copy code
-
-`masked_cc = hide_cc_middle(cc)  print(f"Invalid CC number: {masked_cc}")`
+```python
+masked_cc = hide_cc_middle(cc) 
+print(f"Invalid CC number: {masked_cc}")
+```
 
 This structured, centralized and standardized technique for logging across services improves troubleshooting, analytics and compliance.
 
@@ -549,8 +638,6 @@ End-to-end request tracing with X-Ray provides insights into application perform
 
 ***Task Statement 3: Optimize applications by using AWS services and features.
 Skills in:***
-
-
 
 # Profiling application performance
 
