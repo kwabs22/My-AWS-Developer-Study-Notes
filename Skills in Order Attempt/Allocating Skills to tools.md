@@ -6,6 +6,28 @@ Main themes = debug - monitor, infrastructure changes, artifact creation, securi
 
 Timeline = events = architecture diagram
 
+MOST AWS diagrams are User only or Developer only but for each set of stackholder there is a seperate timeline. Each intersects like a railway network
+
+Example - 
+
+[Building an end-to-end Kubernetes-based DevSecOps software factory on AWS | AWS DevOps Blog (amazon.com)](https://aws.amazon.com/blogs/devops/building-an-end-to-end-kubernetes-based-devsecops-software-factory-on-aws/)
+
+The first diagram doesnt show the app user / inside EKS
+
+For now will use cli as the help function is quick to access
+
+All documentation and study material = parameter selection advice
+
+Related triggers? (list of all triggers?) - Trigger lambda list article here - [AWS Lambda Triggers: What Are They? | Dashbird](https://dashbird.io/blog/what-are-aws-lambda-triggers/) 
+
+API Gateway, Cloudformation, Cloudfront, Eventbridge, Cloudwatch Logs, CodeCommit, CodePipeline, Cognito, Config, Connect, Dynamodb, Kinesis, Kinesis Data Firehose, Lex, MQ, S3, SNS, SQS, Step functions and WAF
+
+How can we use all of these in one loop? 
+
+where do the above fit into amplify and elastic beanstalk?
+
+What about ECS and EKS?
+
 AWS exam guides for Developer
 
 Domain 1: Development with AWS Services - 
