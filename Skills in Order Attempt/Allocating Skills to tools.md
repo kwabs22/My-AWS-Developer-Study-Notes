@@ -28,88 +28,9 @@ where do the above fit into amplify and elastic beanstalk?
 
 What about ECS and EKS?
 
-
-
 Every Skills Line Item leads to code so therefore to make the experimental timeline we need to have all the seperate concepts first and merge them to get the execution order
 
-# Claude Assisted Coding as base suggestions
-
-AWS exam guides for Developer
-
-***Domain 1: Development with AWS Services - 
-Task Statement 1: Develop code for applications hosted on AWS.
-Skills in:
-• Creating fault-tolerant and resilient applications in a programming language (for example, Java, C#, Python, JavaScript, TypeScript, Go)
-• Creating, extending, and maintaining APIs (for example, response/request transformations, enforcing validation rules, overriding status codes)
-• Writing and running unit tests in development environments (for example, using AWS Serverless Application Model [AWS SAM])
-• Writing code to use messaging services
-• Writing code that interacts with AWS services by using APIs and AWS SDKs
-• Handling data streaming by using AWS services
-Task Statement 2: Develop code for AWS Lambda.
-Skills in:
-• Configuring Lambda functions by defining environment variables and parameters (for example, memory, concurrency, timeout, runtime, handler, layers, extensions, triggers, destinations)
-• Handling the event lifecycle and errors by using code (for example, Lambda Destinations, dead-letter queues)
-• Writing and running test code by using AWS services and tools
-• Integrating Lambda functions with AWS services
-• Tuning Lambda functions for optimal performance
-Task Statement 3: Use data stores in application development.
-Skills in:
-• Serializing and deserializing data to provide persistence to a data store
-• Using, managing, and maintaining data stores
-• Managing data lifecycles
-• Using data caching services***
-
-***Domain 2: Security
-Task Statement 1: Implement authentication and/or authorization for applications and AWS services.
-Skills in:
-• Using an identity provider to implement federated access (for example, Amazon Cognito, AWS Identity and Access Management [IAM])
-• Securing applications by using bearer tokens
-• Configuring programmatic access to AWS
-• Making authenticated calls to AWS services
-• Assuming an IAM role
-• Defining permissions for principals
-Task Statement 2: Implement encryption by using AWS services.
-Skills in:
-• Using encryption keys to encrypt or decrypt data
-• Generating certificates and SSH keys for development purposes
-• Using encryption across account boundaries
-• Enabling and disabling key rotation
-Task Statement 3: Manage sensitive data in application code.
-Skills in:
-• Encrypting environment variables that contain sensitive data
-• Using secret management services to secure sensitive data
-• Sanitizing sensitive data***
-
-***Domain 3: Deployment
-Task Statement 1: Prepare application artifacts to be deployed to AWS.
-Skills in:
-• Managing the dependencies of the code module (for example, environment variables, configuration files, container images) within the package
-• Organizing files and a directory structure for application deployment
-• Using code repositories in deployment environments
-• Applying application requirements for resources (for example, memory, cores)
-Task Statement 2: Test applications in development environments.
-Skills in:
-• Testing deployed code by using AWS services and tools
-• Performing mock integration for APIs and resolving integration dependencies
-• Testing applications by using development endpoints (for example, configuring stages in Amazon API Gateway)
-• Deploying application stack updates to existing environments (for example, deploying an AWS SAM template to a different staging environment)
-Task Statement 3: Automate deployment testing.
-Skills in:
-• Creating application test events (for example, JSON payloads for testing Lambda, API Gateway, AWS SAM resources)
-• Deploying API resources to various environments
-• Creating application environments that use approved versions for integration testing (for example, Lambda aliases, container image tags, AWS Amplify branches, AWS Copilot environments)
-• Implementing and deploying infrastructure as code (IaC) templates (for example, AWS SAM templates, AWS CloudFormation templates)
-• Managing environments in individual AWS services (for example, differentiating between development, test, and production in API Gateway)
-Task Statement 4: Deploy code by using AWS CI/CD services.
-Skills in:
-• Updating existing IaC templates (for example, AWS SAM templates, CloudFormation templates)
-• Managing application environments by using AWS services
-• Deploying an application version by using deployment strategies
-• Committing code to a repository to invoke build, test, and deployment actions
-• Using orchestrated workflows to deploy code to different environments
-• Performing application rollbacks by using existing deployment strategies
-• Using labels and branches for version and release management
-• Using existing runtime configurations to create dynamic deployments (for example, using staging variables from API Gateway in Lambda functions)***
+# 
 
 ***Domain 4: Troubleshooting and Optimization
 Task Statement 1: Assist in a root cause analysis.
@@ -238,10 +159,7 @@ So in summary, either explicitly formatting EMF JSON, or using libraries/abstrac
 
 This makes instrumenting key business metrics, workflows easy without manual CloudWatch setup.
 
-
-
 ***• Reviewing application health by using dashboards and insights***
-
 
 Here are some ways to review application health in code using dashboards and insights:
 
@@ -271,12 +189,7 @@ Copy code
 
 The main idea is leveraging data analysis libraries for aggregations, correlations and visualizations to get insights into application health programatically.
 
-
-
-
-
 ***• Troubleshooting deployment failures by using service output logs***
-
 
 Here are some tips for troubleshooting deployment failures using service logs:
 
@@ -335,14 +248,9 @@ Copy code
 
 This structured inspection of machine-generated deployment logs helps reveal issues without needing to manually piece together what happened across environments. Automated parsing brings out key info needed for diagnosing common deployment failures faster.
 
-
-
-
-
 ***Task Statement 2: Instrument code for observability.
 Skills in:
 • Implementing an effective logging strategy to record application behavior and state***
-
 
 Here are some best practices for implementing an effective logging strategy in code:
 
@@ -388,24 +296,457 @@ Copy code
 
 This structured, centralized and standardized technique for logging across services improves troubleshooting, analytics and compliance.
 
-
-
 ***• Implementing code that emits custom metrics***
 
+Here are some ways to implement code that emits custom metrics:
 
+**1. Use a metrics library**
 
+Python example with `prometheus_client`:
 
+```python
+from prometheus_client import start_http_server, Counter
 
+REQUEST_COUNT = Counter('request_count', 'Total Request Count') 
 
-***• Adding annotations for tracing services
-• Implementing notification alerts for specific actions (for example, notifications about quota limits or deployment completions)
-• Implementing tracing by using AWS services and tools
-Task Statement 3: Optimize applications by using AWS services and features.
+def handle_request():
+    REQUEST_COUNT.inc() 
+    # ...
+
+start_http_server(8000)
+handle_request()
+```
+
+**2. Emit metrics to monitoring backends** 
+
+Send custom metrics to tools like StatsD, Graphite, CloudWatch:
+
+```python
+import statsd
+stats = statsd.StatsClient()  
+
+def auth_user():
+    stats.incr('login_count')
+    # ...
+```
+
+**3. Create metric decorators**
+
+Wrap functions to auto-count invocations:
+
+```python
+def metric(metric_name):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            send_metric(metric_name)  
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@metric('posts_created')
+def create_post(post):
+   # ... 
+```
+
+**4. Standardize metric metadata**
+
+Use labels, tags, consistent naming schemes:
+
+```python
+stats.incr('login_count', tags=['region:us-east']) 
+```
+
+This makes custom metric instrumentation reusable, portable and consistent across app code.
+
+***• Adding annotations for tracing services***
+
+Here are some ways to add annotations for distributed tracing in services:
+
+**1. Instrument trace libraries**
+
+For example, OpenTelemetry tracing:
+
+```python
+from opentelemetry import trace
+tracer = trace.get_tracer("app_tracer")
+
+with tracer.start_as_current_span("db_query"): 
+    # ...
+    span.set_attribute("db.rows", row_count)
+    span.add_event("Query completed", {"query": sql_query})
+```
+
+**2. Capture annotations asynchronously** 
+
+Decorate functions or annotate events without modifying method flow:
+
+```python
+from opentelemetry.instrumentation import httpx
+
+@httpx.propagate_traces   
+async def checkout(request):
+   tracer.add_annotation("Payment started")
+   # ...
+   tracer.add_annotation("Inventory reserved") 
+```
+
+**3. Emit tracing data to backends**
+
+Send annotated spans to monitoring systems:
+
+```python
+from opentelemetry import trace
+from opentelemetry.exporter import jaeger
+
+tracer = trace.get_tracer(__name__)
+
+jaeger_exporter = jaeger.JaegerSpanExporter(
+   service_name="checkout_service",
+)
+
+# Register the exporter
+trace.get_tracer_provider().add_span_processor(
+   jaeger.SimpleSpanProcessor(jaeger_exporter)
+) 
+
+tracer.start_span("checkout")
+# ...
+```
+
+Structured application trace data provides deep insights into workflows, failures and performance optimally.
+
+***• Implementing notification alerts for specific actions (for example, notifications about quota limits or deployment completions)***
+
+Here are some ways to implement notification alerts for specific actions like quota limits or deployments:
+
+**1. Use CloudWatch alarms**
+
+Get notified via SNS, SQS, Lambda when a metric threshold is crossed:
+
+```python
+import boto3
+cloudwatch = boto3.client('cloudwatch')
+
+alarm = cloudwatch.put_metric_alarm(
+    AlarmName='DailyQuotaExceeded',
+    MetricName='MaxQuota', 
+    ComparisonOperator='GreaterThanThreshold',
+    Threshold=100,
+    EvaluationPeriods=1, 
+    AlarmActions=['SNS topic ARN']
+)
+```
+
+**2. Check limits programmatically**
+
+Trigger notifications dynamically from code instead of pre-set thresholds:
+
+```python
+from botocore.exceptions import ClientError
+
+try: 
+    ec2.run_instances(MinCount=1, MaxCount=1)
+except ClientError as e:
+   if e.response['Error']['Code'] == 'InstanceLimitExceeded':
+        notify_instance_limit_exceeded()  
+```
+
+**3. Hook into deployment pipelines**
+
+Publish messages to SNS, SQS on deploy status changes:
+
+```python
+if deployment.completed:
+    publish_message(topic='deployments', message='Application deployed Successfully')
+```
+
+**4. Standardize notifications format** 
+
+Use JSON payload with context and actionable info:
+
+```json
+{
+   "alert": "limit_exceeded",
+   "context": { "quota": "DynamoDB Read Capacity" },
+   "timestamp": "2023-02-01T12:00:00", 
+   "details": {
+       "table": "orders",
+       "additional info": "can scale table up if needed" 
+   }
+}
+```
+
+This allows reacting to internal app state changes by piping events to external notification channels. Focused and actionable alerts can be created programmatically when needed.
+
+***• Implementing tracing by using AWS services and tools***
+
+Here are some ways to implement tracing using AWS services:
+
+**1. Instrument AWS SDK**
+
+The AWS SDKs automatically integrate with X-Ray for tracing requests:
+
+```python
+import boto3
+from aws_xray_sdk.core import xray_recorder
+
+xray_recorder.begin_segment('my_app')
+
+s3 = boto3.client('s3')
+s3.list_buckets() # Traced call
+
+xray_recorder.end_segment()
+```
+
+**2. Send custom subsegments**  
+
+Allows capturing custom application methods:
+
+```python
+from aws_xray_sdk import global_sdk_config
+
+subsegment = xray_recorder.begin_subsegment('my_func')
+# Capture metadata or annotations  
+subsegment.put_annotation('key', 'value')
+subsegment.end_subsegment()
+```
+
+**3. Process streaming traces**  
+
+Capture and filter tracing data asynchronously:  
+
+```python
+from aws_xray_sdk.streaming import StreamingXRay
+
+stream = StreamingXRay()
+for trace in stream:
+   if error in trace['message']:
+       notify_error(trace)
+```
+
+**4. Capture metrics and logs** 
+
+Correlates X-Ray traces with other data:
+
+```python
+xray_recorder.put_annotation('auth_latency', str(auth_time_ms))
+xray_recorder.put_metadata('debug', str(debug_info))
+```
+
+End-to-end request tracing with X-Ray provides insights into application performance, failures and operations.
+
+***Task Statement 3: Optimize applications by using AWS services and features.
 Skills in:
-• Profiling application performance
-• Determining minimum memory and compute power for an application
-• Using subscription filter policies to optimize messaging
-• Caching content based on request headers***
+• Profiling application performance***
+
+Here are some effective ways to profile application performance in code:
+
+**1. Use context managers to time blocks**
+
+```python
+import time
+
+start = time.perf_counter()
+with time_block("cpu_heavy_op"):
+   # Perform operation
+   pass
+end = time.perf_counter() 
+
+print(f"Elapsed: {end-start}")
+```
+
+**2. Leverage decorators to measure function timings**
+
+```python
+from timeit import default_timer 
+
+def timer(func):
+    def inner(*args, **kwargs):
+        start = default_timer()
+        result = func(*args, **kwargs)        
+        end = default_timer()
+        print(f"Function {func.__name__} Took {end-start}")
+        return result
+    return inner
+
+@timer
+def long_running(n):
+   # Complex logic
+   return n
+```
+
+**3. Profile hotspots and memory with cProfiler**
+
+```python
+import cProfile
+
+cProfile.run('long_running(5)')
+# Generates stats on memory and cpu usage
+```
+
+**4. Visualize flamegraphs with libraries** 
+
+Easily spot bottlenecks.
+
+Profiling instrumentation gives visibility into the performance of Python code in production, helping identify optimization opportunities without needing to use a debugger.
+
+***• Determining minimum memory and compute power for an application***
+Here are some effective strategies in code to determine the minimum memory and compute requirements for an application:
+
+**1. Use load testing**
+
+Gradually increase requests and monitor resource utilization:
+
+```python
+import locust
+
+@locust.task
+def index(l):
+    l.client.get("/")
+
+locust -u 50 # simulated users    
+```
+
+**2. Size workflows**  
+
+Profile representative workflows end-to-end:
+
+```python
+@timer
+def process_order():
+   # Place order logic  
+   pass
+
+min_memory = get_memory_usage() 
+```
+
+**3. Set lower bounds in config**
+
+```python
+min_instances = 1
+min_memory = 512MB # MB
+min_cpu = 0.5 # vCPUs
+
+config = {
+  "instaces": max(num_instances, min_instances),
+  "memory": max(total_memory, min_memory),
+  "cpu": max(total_vcpu, min_cpu)
+}
+```
+
+**4. Over-provision in staging** 
+
+Test with excess capacity and scale down to save costs.
+
+Automated sizing eliminates guess-work. Optimally right-sized apps save resources without sacrificing performance.
+
+***• Using subscription filter policies to optimize messaging***
+
+Here are some ways to use subscription filter policies to optimize messaging workflows:
+
+**1. Reduce unwanted messages**
+
+```
+{
+   "region": ["us-east-1"],
+   "eventType": ["order_created"]    
+}
+```
+
+**2. Split event streams** 
+
+Route types to different consumers:
+
+```
+{
+   "userType": ["premium"]
+}
+```
+
+```
+{
+   "userType": ["basic"]  
+} 
+```
+
+**3. Fan-out locality based**
+
+```
+{
+  "country": ["United States"] 
+}
+```
+
+```
+{
+   "country": ["Canada"]
+} 
+```
+
+**4. Implement with SNS/SQS**
+
+```python
+import json
+from boto3 import client
+
+sns = client("sns") 
+queue = client("sqs")
+
+filter_policy = {
+  "region": ["us-east-1"]
+}  
+
+queue_arn = queue.create_queue(Attributes={"FilterPolicy":json.dumps(filter_policy)})
+topic.subscribe(queue_arn)
+```
+
+Fine-grained stream filtering reduces unnecessary data transfer and computation downstream optimizing for cost, throughput, and latency.
+
+***• Caching content based on request headers***
+
+Here are some examples of caching content based on request headers in code:
+
+**1. Check User-Agent header** 
+
+```python
+from flask import request
+
+@app.route('/data')
+def data():
+    user_agent = request.headers.get('User-Agent')
+    if user_agent == MOBILE_USER_AGENT:
+        return cache.get('mobile_data')
+    else:
+        return cache.get('standard_data')
+```
+
+**2. Vary cache by Accept-Language**
+
+```python
+lang = request.headers.get('Accept-Language')
+if lang.startswith('es'):
+    return cache.get('es_data')
+else: 
+    return cache.get('en_data')
+```
+
+**3. Custom header-based versioning**
+
+```python
+version = request.headers.get('Api-Version')
+key = f'data:v{version}'
+return cache.get(key) 
+```
+
+**4. Hash header values**  
+
+```python
+etag = hash(request.headers) 
+key = f'data:{etag}'
+return cache.get(key)
+```
+
+This allows caching multiple representations optimized for different consumers like devices, locales, API versions etc., reducing duplicate generation and transfer of data.
 
 ***AWS DevOps Engineer***
 
